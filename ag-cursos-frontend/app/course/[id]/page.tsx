@@ -1,4 +1,4 @@
-import CheckoutButton from './CheckoutButton';
+import AddToCartButton from '../../components/AddToCartButton';
 
 async function getCourse(id: string) {
   const res = await fetch(`http://localhost:3000/courses/${id}`, { cache: 'no-store' });
@@ -8,24 +8,44 @@ async function getCourse(id: string) {
 
 export default async function CoursePage({ params }: { params: { id: string } }) {
   const course = await getCourse(params.id);
-  const mockUserId = 'user-demo-123';
 
   return (
-    <main className="p-10 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
-      <p className="text-gray-600 mb-4">{course.description}</p>
-      <p className="text-2xl font-bold text-green-600 mb-6">${course.price} ARS</p>
+    <div className="max-w-4xl mx-auto px-6 py-12">
+      {/* Cabecera del curso */}
+      <div className="bg-blue-700 text-white rounded-2xl p-8 mb-8">
+        <h1 className="text-4xl font-bold mb-3">{course.title}</h1>
+        <p className="text-blue-100 text-lg mb-6">{course.description}</p>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <span className="text-3xl font-bold">${course.price.toLocaleString('es-AR')} ARS</span>
+          <AddToCartButton id={course.id} title={course.title} price={course.price} />
+        </div>
+      </div>
 
-      <h2 className="text-xl font-semibold mb-3">Módulos del curso</h2>
-      <ul className="mb-6 space-y-2">
-        {course.modules?.map((mod: any) => (
-          <li key={mod.id} className="border rounded p-3 bg-white">
-            {mod.title}
-          </li>
-        ))}
-      </ul>
+      {/* Módulos / Secciones */}
+      <h2 className="text-2xl font-bold text-gray-900 mb-5">Contenido del curso</h2>
 
-      <CheckoutButton courseId={course.id} userId={mockUserId} />
-    </main>
+      {course.modules?.length === 0 || !course.modules ? (
+        <div className="text-center py-12 text-gray-400 border rounded-xl">
+          <div className="text-4xl mb-2">🎬</div>
+          <p>Este curso aún no tiene módulos cargados.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {course.modules.map((mod: any, index: number) => (
+            <div key={mod.id} className="bg-white border rounded-xl p-5 flex items-center gap-4 shadow-sm">
+              <div className="bg-blue-100 text-blue-700 font-bold w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                {index + 1}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{mod.title}</h3>
+                {mod.videoUrl && (
+                  <p className="text-sm text-gray-400 mt-0.5">📹 Video disponible</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
