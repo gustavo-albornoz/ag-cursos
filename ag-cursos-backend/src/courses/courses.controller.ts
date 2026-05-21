@@ -16,7 +16,7 @@ export class CoursesController {
   }
 
   @Post()
-  create(@Body() body: { title: string; description: string; price: number }) {
+  create(@Body() body: { title: string; description: string; price: number; imageUrl?: string }) {
     return this.coursesService.create(body);
   }
 }

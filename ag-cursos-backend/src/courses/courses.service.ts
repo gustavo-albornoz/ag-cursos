@@ -18,7 +18,7 @@ export class CoursesService {
     });
   }
 
-  async create(data: { title: string; description: string; price: number }) {
+  async create(data: { title: string; description: string; price: number; imageUrl?: string }) {
     return this.prisma.course.create({ data });
   }
 }

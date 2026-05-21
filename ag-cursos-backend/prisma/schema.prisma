@@ -19,6 +19,7 @@ model Course {
   title       String
   description String
   price       Float
+  imageUrl    String?
   modules     Module[]
   purchases   Purchase[]
 }

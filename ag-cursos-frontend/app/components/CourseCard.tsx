@@ -1,17 +1,25 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 type Course = {
   id: string;
   title: string;
   description: string;
   price: number;
+  imageUrl?: string;
 };
 
 export default function CourseCard({ course }: { course: Course }) {
   return (
     <div className="bg-white border rounded-xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
-      <div className="bg-blue-600 h-32 flex items-center justify-center">
-        <span className="text-5xl">🎓</span>
+      <div className="relative h-44 bg-blue-100 flex-shrink-0">
+        {course.imageUrl ? (
+          <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
+        ) : (
+          <div className="w-full h-full bg-blue-600 flex items-center justify-center">
+            <span className="text-5xl">🎓</span>
+          </div>
+        )}
       </div>
       <div className="p-5 flex flex-col flex-1">
         <h2 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">{course.title}</h2>

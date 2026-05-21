@@ -1,12 +1,14 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type Course = {
   id: string;
   title: string;
   description: string;
   price: number;
+  imageUrl?: string;
 };
 
 export default function CourseCarousel({ courses }: { courses: Course[] }) {
@@ -27,8 +29,14 @@ export default function CourseCarousel({ courses }: { courses: Course[] }) {
   return (
     <div className="relative max-w-3xl mx-auto">
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
-        <div className="bg-blue-600 md:w-64 h-48 md:h-auto flex items-center justify-center flex-shrink-0">
-          <span className="text-8xl">🎓</span>
+        <div className="relative md:w-64 h-48 md:h-auto flex-shrink-0 bg-blue-100">
+          {course.imageUrl ? (
+            <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
+          ) : (
+            <div className="w-full h-full bg-blue-600 flex items-center justify-center">
+              <span className="text-8xl">🎓</span>
+            </div>
+          )}
         </div>
         <div className="p-8 flex flex-col justify-center flex-1">
           <span className="text-blue-600 text-sm font-semibold uppercase tracking-wide mb-2">Curso destacado</span>
@@ -47,26 +55,15 @@ export default function CourseCarousel({ courses }: { courses: Course[] }) {
 
       {courses.length > 1 && (
         <>
-          <button
-            onClick={prev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 bg-white shadow-md rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition"
-          >
+          <button onClick={prev} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 bg-white shadow-md rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition text-xl">
             ‹
           </button>
-          <button
-            onClick={next}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 bg-white shadow-md rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition"
-          >
+          <button onClick={next} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 bg-white shadow-md rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition text-xl">
             ›
           </button>
-
           <div className="flex justify-center gap-2 mt-5">
             {courses.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrent(i)}
-                className={`w-2.5 h-2.5 rounded-full transition ${i === current ? 'bg-blue-600' : 'bg-gray-300'}`}
-              />
+              <button key={i} onClick={() => setCurrent(i)} className={`w-2.5 h-2.5 rounded-full transition ${i === current ? 'bg-blue-600' : 'bg-gray-300'}`} />
             ))}
           </div>
         </>
