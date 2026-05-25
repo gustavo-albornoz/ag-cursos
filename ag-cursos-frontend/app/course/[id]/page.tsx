@@ -7,8 +7,9 @@ async function getCourse(id: string) {
   return res.json();
 }
 
-export default async function CoursePage({ params }: { params: { id: string } }) {
-  const course = await getCourse(params.id);
+export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const course = await getCourse(id);
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">

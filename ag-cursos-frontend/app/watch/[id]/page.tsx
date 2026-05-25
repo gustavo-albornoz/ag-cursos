@@ -6,8 +6,9 @@ async function getCourse(id: string) {
   return res.json();
 }
 
-export default async function WatchPage({ params }: { params: { id: string } }) {
-  const course = await getCourse(params.id);
+export default async function WatchPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const course = await getCourse(id);
 
   return (
     <main className="p-10 max-w-4xl mx-auto">
