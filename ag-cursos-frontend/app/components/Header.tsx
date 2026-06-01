@@ -16,8 +16,8 @@ export default function Header() {
   useEffect(() => {
     fetch('http://localhost:3000/courses')
       .then(res => res.json())
-      .then(data => setCourses(data))
-      .catch(() => {});
+      .then(data => Array.isArray(data) ? setCourses(data) : setCourses([]))
+      .catch(err => console.error('[Header] Error cargando cursos:', err));
   }, []);
 
   useEffect(() => {
@@ -73,14 +73,14 @@ export default function Header() {
           </Link>
 
           {/* Sección Profesor */}
-          {user?.role === 'PROFESOR' && (
+          {(user?.isProfesor || user?.isAdmin) && (
             <Link href="/profesor" className="text-purple-600 hover:text-purple-700 font-medium transition">
               Profesores
             </Link>
           )}
 
           {/* Sección Admin */}
-          {user?.role === 'ADMIN' && (
+          {user?.isAdmin && (
             <Link href="/admin" className="text-red-600 hover:text-red-700 font-medium transition">
               Admin
             </Link>

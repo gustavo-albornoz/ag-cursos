@@ -7,18 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ALUMNO
-  PROFESOR
-  ADMIN
-}
-
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  password  String
-  role      Role       @default(ALUMNO)
-  purchases Purchase[]
+  id         String     @id @default(uuid())
+  email      String     @unique
+  password   String
+  isAlumno   Boolean    @default(true)
+  isProfesor Boolean    @default(false)
+  isAdmin    Boolean    @default(false)
+  purchases  Purchase[]
 }
 
 model Course {

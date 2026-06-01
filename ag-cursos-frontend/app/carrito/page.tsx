@@ -1,5 +1,6 @@
 'use client';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -8,11 +9,16 @@ const MOCK_USER_ID = 'user-demo-123';
 
 export default function CarritoPage() {
   const { items, removeItem, clearCart, total } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleCheckout = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
     setLoading(true);
     setError('');
 

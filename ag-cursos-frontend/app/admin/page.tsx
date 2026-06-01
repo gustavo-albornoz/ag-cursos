@@ -1,9 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useAuth, UserRole } from '../context/AuthContext';
+import { useAuth, User } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
-
-type User = { id: string; email: string; role: UserRole };
 
 export default function AdminPage() {
   const { user, token } = useAuth();
@@ -11,7 +9,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    if (!user || user.role !== 'ADMIN') router.push('/');
+    if (!user || !user.isAdmin) router.push('/');
   }, [user]);
 
   useEffect(() => {
@@ -24,14 +22,14 @@ export default function AdminPage() {
       .catch(() => {});
   }, [token]);
 
-  const handleRoleChange = async (id: string, role: UserRole) => {
-    const res = await fetch(`http://localhost:3000/users/${id}`, {
+  const togglePermission = async (id: string, field: 'isProfesor' | 'isAdmin', current: boolean) => {
+    const res = await fetch(`http://localhost:3000/users/${id}/permissions`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ role }),
+      body: JSON.stringify({ [field]: !current }),
     });
     const updated = await res.json();
-    setUsers(prev => prev.map(u => u.id === id ? updated : u));
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updated } : u));
   };
 
   const handleDelete = async (id: string) => {
@@ -43,24 +41,19 @@ export default function AdminPage() {
     setUsers(prev => prev.filter(u => u.id !== id));
   };
 
-  const roleColors: Record<UserRole, string> = {
-    ALUMNO: 'bg-blue-100 text-blue-700',
-    PROFESOR: 'bg-purple-100 text-purple-700',
-    ADMIN: 'bg-red-100 text-red-700',
-  };
-
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-5xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
-      <p className="text-gray-500 mb-10">Gestión de usuarios</p>
+      <p className="text-gray-500 mb-10">Gestión de usuarios y permisos</p>
 
       <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Email</th>
-              <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Rol</th>
-              <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Cambiar rol</th>
+              <th className="text-center px-6 py-3 text-sm font-semibold text-gray-600">Alumno</th>
+              <th className="text-center px-6 py-3 text-sm font-semibold text-gray-600">Profesor</th>
+              <th className="text-center px-6 py-3 text-sm font-semibold text-gray-600">Admin</th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
@@ -68,22 +61,34 @@ export default function AdminPage() {
             {users.map(u => (
               <tr key={u.id} className="hover:bg-gray-50 transition">
                 <td className="px-6 py-4 text-sm text-gray-900">{u.email}</td>
-                <td className="px-6 py-4">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${roleColors[u.role]}`}>
-                    {u.role}
-                  </span>
+
+                {/* isAlumno — siempre activo, no se puede quitar */}
+                <td className="px-6 py-4 text-center">
+                  <span className="inline-block w-5 h-5 rounded-full bg-blue-500" title="Siempre activo" />
                 </td>
-                <td className="px-6 py-4">
-                  <select
-                    value={u.role}
-                    onChange={e => handleRoleChange(u.id, e.target.value as UserRole)}
-                    className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+
+                {/* isProfesor — toggle */}
+                <td className="px-6 py-4 text-center">
+                  <button
+                    onClick={() => togglePermission(u.id, 'isProfesor', u.isProfesor)}
+                    disabled={u.id === user?.id}
+                    className={`w-12 h-6 rounded-full transition-colors relative ${u.isProfesor ? 'bg-purple-500' : 'bg-gray-300'} disabled:opacity-40`}
                   >
-                    <option value="ALUMNO">ALUMNO</option>
-                    <option value="PROFESOR">PROFESOR</option>
-                    <option value="ADMIN">ADMIN</option>
-                  </select>
+                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${u.isProfesor ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
                 </td>
+
+                {/* isAdmin — toggle */}
+                <td className="px-6 py-4 text-center">
+                  <button
+                    onClick={() => togglePermission(u.id, 'isAdmin', u.isAdmin)}
+                    disabled={u.id === user?.id}
+                    className={`w-12 h-6 rounded-full transition-colors relative ${u.isAdmin ? 'bg-red-500' : 'bg-gray-300'} disabled:opacity-40`}
+                  >
+                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${u.isAdmin ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
+                </td>
+
                 <td className="px-6 py-4 text-right">
                   {u.id !== user?.id && (
                     <button
@@ -99,6 +104,10 @@ export default function AdminPage() {
           </tbody>
         </table>
       </div>
+
+      <p className="text-xs text-gray-400 mt-4">
+        * El permiso de Alumno es permanente. No podés modificar tus propios permisos.
+      </p>
     </div>
   );
 }

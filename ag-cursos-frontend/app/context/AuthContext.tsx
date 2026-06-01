@@ -1,8 +1,13 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
 
-export type UserRole = 'ALUMNO' | 'PROFESOR' | 'ADMIN';
-type User = { id: string; email: string; role: UserRole };
+export type User = {
+  id: string;
+  email: string;
+  isAlumno: boolean;
+  isProfesor: boolean;
+  isAdmin: boolean;
+};
 
 type AuthContextType = {
   user: User | null;

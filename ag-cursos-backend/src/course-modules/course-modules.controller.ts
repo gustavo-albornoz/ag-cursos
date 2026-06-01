@@ -3,11 +3,10 @@ import { CourseModulesService } from './course-modules.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { Role } from '../auth/role.enum';
 
 @Controller()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.PROFESOR, Role.ADMIN)
+@Roles('PROFESOR')
 export class CourseModulesController {
   constructor(private courseModulesService: CourseModulesService) {}
 

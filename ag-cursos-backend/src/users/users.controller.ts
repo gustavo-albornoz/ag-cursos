@@ -3,11 +3,10 @@ import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { Role } from '../auth/role.enum';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+@Roles('ADMIN')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
@@ -16,9 +15,12 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Patch(':id')
-  updateUser(@Param('id') id: string, @Body() body: { email?: string; role?: Role }) {
-    return this.usersService.updateUser(id, body);
+  @Patch(':id/permissions')
+  updatePermissions(
+    @Param('id') id: string,
+    @Body() body: { isAlumno?: boolean; isProfesor?: boolean; isAdmin?: boolean },
+  ) {
+    return this.usersService.updatePermissions(id, body);
   }
 
   @Delete(':id')

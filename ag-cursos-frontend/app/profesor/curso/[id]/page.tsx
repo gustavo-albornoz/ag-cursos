@@ -16,7 +16,7 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user || (user.role !== 'PROFESOR' && user.role !== 'ADMIN')) router.push('/');
+    if (!user || (!user.isProfesor && !user.isAdmin)) router.push('/');
   }, [user]);
 
   useEffect(() => {
