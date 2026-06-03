@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -13,6 +13,27 @@ export class CoursesController {
     return this.coursesService.findAll();
   }
 
+  @Get('mine')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PROFESOR')
+  findMine(@Request() req: any) {
+    return this.coursesService.findByProfesor(req.user.userId);
+  }
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  findAllAdmin() {
+    return this.coursesService.findAllAdmin();
+  }
+
+  @Patch(':id/toggle')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  toggleActive(@Param('id') id: string) {
+    return this.coursesService.toggleActive(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.coursesService.findOne(id);
@@ -21,21 +42,21 @@ export class CoursesController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PROFESOR')
-  create(@Body() body: { title: string; description: string; price: number; imageUrl?: string }) {
-    return this.coursesService.create(body);
+  create(@Body() body: { title: string; description: string; price: number; imageUrl?: string }, @Request() req: any) {
+    return this.coursesService.create({ ...body, profesorId: req.user.userId });
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PROFESOR')
-  update(@Param('id') id: string, @Body() body: { title?: string; description?: string; price?: number; imageUrl?: string }) {
-    return this.coursesService.update(id, body);
+  update(@Param('id') id: string, @Body() body: { title?: string; description?: string; price?: number; imageUrl?: string }, @Request() req: any) {
+    return this.coursesService.update(id, body, req.user.userId, req.user.isAdmin);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PROFESOR')
-  remove(@Param('id') id: string) {
-    return this.coursesService.remove(id);
+  remove(@Param('id') id: string, @Request() req: any) {
+    return this.coursesService.remove(id, req.user.userId, req.user.isAdmin);
   }
 }

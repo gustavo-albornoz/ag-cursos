@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
 
 type CartItem = { id: string; title: string; price: number };
 
@@ -13,24 +14,80 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | null>(null);
 
+const localKey = (userId: string) => `ag-cursos-cart-${userId}`;
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user, token } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
 
+  // Al cambiar de sesión: carga el carrito desde la BD (o localStorage como fallback)
   useEffect(() => {
-    const stored = localStorage.getItem('ag-cursos-cart');
-    if (stored) setItems(JSON.parse(stored));
-  }, []);
+    if (!user || !token) {
+      setItems([]);
+      return;
+    }
+    fetch('http://localhost:3000/cart', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const mapped: CartItem[] = data.map((ci: any) => ({
+            id: ci.course.id,
+            title: ci.course.title,
+            price: ci.course.price,
+          }));
+          setItems(mapped);
+          localStorage.setItem(localKey(user.id), JSON.stringify(mapped));
+        }
+      })
+      .catch(() => {
+        const stored = localStorage.getItem(localKey(user.id));
+        if (stored) setItems(JSON.parse(stored));
+      });
+  }, [user?.id, token]);
 
-  useEffect(() => {
-    localStorage.setItem('ag-cursos-cart', JSON.stringify(items));
-  }, [items]);
-
-  const addItem = (item: CartItem) => {
-    setItems(prev => prev.find(i => i.id === item.id) ? prev : [...prev, item]);
+  const syncLocal = (newItems: CartItem[]) => {
+    if (user) localStorage.setItem(localKey(user.id), JSON.stringify(newItems));
   };
 
-  const removeItem = (id: string) => setItems(prev => prev.filter(i => i.id !== id));
-  const clearCart = () => setItems([]);
+  const addItem = (item: CartItem) => {
+    if (items.find(i => i.id === item.id)) return;
+    const newItems = [...items, item];
+    setItems(newItems);
+    syncLocal(newItems);
+    if (token) {
+      fetch('http://localhost:3000/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ courseId: item.id }),
+      }).catch(() => {});
+    }
+  };
+
+  const removeItem = (id: string) => {
+    const newItems = items.filter(i => i.id !== id);
+    setItems(newItems);
+    syncLocal(newItems);
+    if (token) {
+      fetch(`http://localhost:3000/cart/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+    }
+  };
+
+  const clearCart = () => {
+    setItems([]);
+    if (user) localStorage.setItem(localKey(user.id), JSON.stringify([]));
+    if (token) {
+      fetch('http://localhost:3000/cart/clear', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+    }
+  };
+
   const total = items.reduce((sum, i) => sum + i.price, 0);
 
   return (

@@ -11,12 +11,18 @@ export class CourseModulesController {
   constructor(private courseModulesService: CourseModulesService) {}
 
   @Post('courses/:courseId/modules')
-  create(@Param('courseId') courseId: string, @Body() body: { title: string; videoUrl: string }) {
+  create(
+    @Param('courseId') courseId: string,
+    @Body() body: { title: string; description?: string; videoUrl?: string; documentUrl?: string },
+  ) {
     return this.courseModulesService.create(courseId, body);
   }
 
   @Patch('modules/:id')
-  update(@Param('id') id: string, @Body() body: { title?: string; videoUrl?: string }) {
+  update(
+    @Param('id') id: string,
+    @Body() body: { title?: string; description?: string; videoUrl?: string; documentUrl?: string },
+  ) {
     return this.courseModulesService.update(id, body);
   }
 

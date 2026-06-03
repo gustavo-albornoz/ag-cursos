@@ -3,3 +3,4 @@ dist/
 .env
 *.log
 postgres_data/
+ag-cursos-frontend/public/cursos/1780431167761-Anatomia-Humana-2022-1.pdf

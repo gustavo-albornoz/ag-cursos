@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 
-const MOCK_USER_ID = 'user-demo-123';
 
 export default function CarritoPage() {
   const { items, removeItem, clearCart, total } = useCart();
@@ -27,14 +26,13 @@ export default function CarritoPage() {
         const res = await fetch('http://localhost:3000/checkout/mock', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: MOCK_USER_ID, courseId: item.id }),
+          body: JSON.stringify({ userId: user.id, courseId: item.id }),
         });
         if (!res.ok) throw new Error(`Error al procesar "${item.title}"`);
       }
 
       clearCart();
-      router.push('/');
-      alert('¡Pago exitoso! Ya podés acceder a tus cursos.');
+      router.push('/mis-cursos');
     } catch (e: any) {
       setError(e.message || 'Ocurrió un error al procesar el pago.');
     } finally {
@@ -59,7 +57,15 @@ export default function CarritoPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">Tu carrito</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold text-gray-900">Tu carrito</h1>
+        <button
+          onClick={() => { if (confirm('¿Vaciar todo el carrito?')) clearCart(); }}
+          className="text-sm text-red-400 hover:text-red-600 font-medium transition"
+        >
+          Vaciar carrito
+        </button>
+      </div>
 
       <div className="space-y-4 mb-8">
         {items.map(item => (

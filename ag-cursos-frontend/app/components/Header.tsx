@@ -3,14 +3,17 @@ import Link from 'next/link';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Course = { id: string; title: string };
 
 export default function Header() {
   const { items } = useCart();
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,14 +33,45 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) return;
+    setSearchQuery('');
+    router.push(`/buscar?q=${encodeURIComponent(q)}`);
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold text-blue-600 tracking-tight">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-6">
+        {/* Logo */}
+        <Link href="/" className="text-2xl font-bold text-blue-600 tracking-tight flex-shrink-0">
           AG Cursos
         </Link>
 
-        <nav className="flex items-center gap-8">
+        {/* Buscador */}
+        <form onSubmit={handleSearch} className="flex-1 max-w-sm">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Buscar cursos..."
+              className="w-full border rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+            />
+            <button
+              type="submit"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        {/* Nav */}
+        <nav className="flex items-center gap-6 ml-auto">
           {/* Dropdown Cursos */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -72,14 +106,21 @@ export default function Header() {
             Acerca de Nosotros
           </Link>
 
-          {/* Sección Profesor */}
-          {(user?.isProfesor || user?.isAdmin) && (
-            <Link href="/profesor" className="text-purple-600 hover:text-purple-700 font-medium transition">
-              Profesores
+          {/* Mis Cursos — alumno */}
+          {user && !user.isProfesor && !user.isAdmin && (
+            <Link href="/mis-cursos" className="text-gray-700 hover:text-blue-600 font-medium transition">
+              Mis Cursos
             </Link>
           )}
 
-          {/* Sección Admin */}
+          {/* Mis Cursos — profesor */}
+          {user?.isProfesor && !user?.isAdmin && (
+            <Link href="/profesor/mis-cursos" className="text-purple-600 hover:text-purple-700 font-medium transition">
+              Mis Cursos
+            </Link>
+          )}
+
+          {/* Admin */}
           {user?.isAdmin && (
             <Link href="/admin" className="text-red-600 hover:text-red-700 font-medium transition">
               Admin

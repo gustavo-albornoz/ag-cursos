@@ -14,7 +14,9 @@ model User {
   isAlumno   Boolean    @default(true)
   isProfesor Boolean    @default(false)
   isAdmin    Boolean    @default(false)
+  courses    Course[]
   purchases  Purchase[]
+  cartItems  CartItem[]
 }
 
 model Course {
@@ -23,23 +25,43 @@ model Course {
   description String
   price       Float
   imageUrl    String?
+  isActive    Boolean    @default(true)
+  profesorId  String?
+  profesor    User?      @relation(fields: [profesorId], references: [id])
   modules     Module[]
   purchases   Purchase[]
+  cartItems   CartItem[]
 }
 
 model Module {
-  id       String @id @default(uuid())
-  title    String
-  videoUrl String
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id])
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  videoUrl    String?
+  documentUrl String?
+  courseId    String
+  course      Course  @relation(fields: [courseId], references: [id])
+}
+
+model CartItem {
+  id        String     @id @default(uuid())
+  userId    String
+  courseId  String
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id])
+  course    Course     @relation(fields: [courseId], references: [id])
+  purchases Purchase[]
+
+  @@unique([userId, courseId])
 }
 
 model Purchase {
-  id       String @id @default(uuid())
-  userId   String
-  courseId String
-  status   String @default("PENDING")
-  user     User   @relation(fields: [userId], references: [id])
-  course   Course @relation(fields: [courseId], references: [id])
+  id        String     @id @default(uuid())
+  userId    String
+  courseId  String
+  status    String     @default("PENDING")
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id])
+  course    Course     @relation(fields: [courseId], references: [id])
+  cartItems CartItem[]
 }

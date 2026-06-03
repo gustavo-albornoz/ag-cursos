@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import FileUploadInput from '../components/FileUploadInput';
 
-type Course = { id: string; title: string; description: string; price: number; imageUrl?: string };
+type Course = { id: string; title: string; price: number; imageUrl?: string };
 type CourseForm = { title: string; description: string; price: string; imageUrl: string };
 
 const emptyForm: CourseForm = { title: '', description: '', price: '', imageUrl: '' };
@@ -14,8 +15,6 @@ export default function ProfesorPage() {
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [form, setForm] = useState<CourseForm>(emptyForm);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<CourseForm>(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,11 +23,14 @@ export default function ProfesorPage() {
   }, [user]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/courses')
+    if (!token) return;
+    fetch('http://localhost:3000/courses/mine', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then(res => res.json())
-      .then(setCourses)
+      .then(data => setCourses(Array.isArray(data) ? data : []))
       .catch(() => {});
-  }, []);
+  }, [token]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,45 +58,10 @@ export default function ProfesorPage() {
     }
   };
 
-  const startEdit = (course: Course) => {
-    setEditingId(course.id);
-    setEditForm({
-      title: course.title,
-      description: course.description,
-      price: course.price.toString(),
-      imageUrl: course.imageUrl || '',
-    });
-  };
-
-  const handleEdit = async (id: string) => {
-    const res = await fetch(`http://localhost:3000/courses/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        title: editForm.title,
-        description: editForm.description,
-        price: parseFloat(editForm.price),
-        imageUrl: editForm.imageUrl || undefined,
-      }),
-    });
-    const updated = await res.json();
-    setCourses(prev => prev.map(c => c.id === id ? updated : c));
-    setEditingId(null);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Seguro que querés eliminar este curso?')) return;
-    await fetch(`http://localhost:3000/courses/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setCourses(prev => prev.filter(c => c.id !== id));
-  };
-
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold text-gray-900 mb-2">Panel de Profesores</h1>
-      <p className="text-gray-500 mb-10">Gestioná los cursos y su contenido</p>
+      <p className="text-gray-500 mb-10">Creá un nuevo curso y gestioná tu contenido</p>
 
       {/* Formulario nuevo curso */}
       <div className="bg-white border rounded-2xl p-6 shadow-sm mb-10">
@@ -105,23 +72,26 @@ export default function ProfesorPage() {
             onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
             className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <textarea
-            placeholder="Descripción" required value={form.description}
-            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-            className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="number" placeholder="Precio (ARS)" required value={form.price}
-              onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-              className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div>
+            <textarea
+              placeholder="Descripción" required value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              maxLength={500}
+              className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
             />
-            <input
-              type="text" placeholder="Ruta de imagen (ej: /cursos/mi-curso.jpg)" value={form.imageUrl}
-              onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
-              className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <p className="text-xs text-gray-400 text-right mt-1">{form.description.length}/500</p>
           </div>
+          <input
+            type="number" placeholder="Precio (ARS)" required value={form.price}
+            onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+            className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <FileUploadInput
+            value={form.imageUrl}
+            onChange={url => setForm(f => ({ ...f, imageUrl: url }))}
+            placeholder="Imagen del curso"
+            accept="image/*"
+          />
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit" disabled={loading}
@@ -132,80 +102,27 @@ export default function ProfesorPage() {
         </form>
       </div>
 
-      {/* Lista de cursos */}
-      <h2 className="text-xl font-bold text-gray-900 mb-5">
-        Cursos existentes ({courses.length})
-      </h2>
-
-      {courses.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 border rounded-xl bg-white">
-          <div className="text-5xl mb-3">📚</div>
-          <p>Todavía no hay cursos. ¡Creá el primero!</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {courses.map(course => (
-            <div key={course.id} className="bg-white border rounded-xl shadow-sm overflow-hidden">
-              {editingId === course.id ? (
-                /* Modo edición */
-                <div className="p-5 space-y-3">
-                  <input
-                    value={editForm.title}
-                    onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
-                    className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <textarea
-                    value={editForm.description}
-                    onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
-                    className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="number" value={editForm.price}
-                      onChange={e => setEditForm(f => ({ ...f, price: e.target.value }))}
-                      className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <input
-                      value={editForm.imageUrl}
-                      onChange={e => setEditForm(f => ({ ...f, imageUrl: e.target.value }))}
-                      placeholder="/cursos/imagen.jpg"
-                      className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleEdit(course.id)} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
-                      Guardar
-                    </button>
-                    <button onClick={() => setEditingId(null)} className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Modo visualización */
-                <div className="p-5 flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{course.title}</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">${course.price.toLocaleString('es-AR')} ARS</p>
-                    {course.imageUrl && <p className="text-xs text-gray-400 mt-0.5">{course.imageUrl}</p>}
-                  </div>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <Link href={`/profesor/curso/${course.id}`}>
-                      <button className="bg-purple-100 text-purple-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-purple-200 transition">
-                        Módulos
-                      </button>
-                    </Link>
-                    <button onClick={() => startEdit(course)} className="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition">
-                      Editar
-                    </button>
-                    <button onClick={() => handleDelete(course.id)} className="bg-red-100 text-red-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-200 transition">
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+      {/* Acceso rápido a mis cursos */}
+      {courses.length > 0 && (
+        <div className="bg-white border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">Tus cursos ({courses.length})</h2>
+            <Link href="/profesor/mis-cursos" className="text-blue-600 hover:underline text-sm font-medium">
+              Ver todos →
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {courses.slice(0, 5).map(course => (
+              <div key={course.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                <span className="text-sm text-gray-700">{course.title}</span>
+                <Link href={`/profesor/curso/${course.id}`}>
+                  <button className="text-xs text-purple-600 hover:text-purple-800 font-medium transition">
+                    Módulos →
+                  </button>
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
