@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,7 +8,7 @@ import { API_URL } from '../lib/api';
 
 type Course = { id: string; title: string; description: string; price: number; imageUrl?: string };
 
-export default function BuscarPage() {
+function BuscarResultados() {
   const searchParams = useSearchParams();
   const q = searchParams.get('q') || '';
   const [courses, setCourses] = useState<Course[]>([]);
@@ -81,5 +81,13 @@ export default function BuscarPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BuscarPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-24 text-gray-400">Buscando...</div>}>
+      <BuscarResultados />
+    </Suspense>
   );
 }
