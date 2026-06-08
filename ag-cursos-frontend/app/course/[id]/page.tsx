@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import AddToCartButton from '../../components/AddToCartButton';
+import { API_URL } from '../../lib/api';
 
 async function getCourse(id: string) {
-  const res = await fetch(`http://localhost:3000/courses/${id}`, { cache: 'no-store' });
+  const res = await fetch(`${API_URL}/courses/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Curso no encontrado');
   return res.json();
 }

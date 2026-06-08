@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth, User } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '../lib/api';
 
 type AdminCourse = {
   id: string;
@@ -23,14 +24,14 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch('http://localhost:3000/users', {
+    fetch('${API_URL}/users', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
       .then(setUsers)
       .catch(() => {});
 
-    fetch('http://localhost:3000/courses/admin', {
+    fetch('${API_URL}/courses/admin', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -39,7 +40,7 @@ export default function AdminPage() {
   }, [token]);
 
   const togglePermission = async (id: string, field: 'isProfesor' | 'isAdmin', current: boolean) => {
-    const res = await fetch(`http://localhost:3000/users/${id}/permissions`, {
+    const res = await fetch(`${API_URL}/users/${id}/permissions`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ [field]: !current }),
@@ -50,7 +51,7 @@ export default function AdminPage() {
 
   const handleDeleteUser = async (id: string) => {
     if (!confirm('¿Eliminar este usuario?')) return;
-    await fetch(`http://localhost:3000/users/${id}`, {
+    await fetch(`${API_URL}/users/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -58,7 +59,7 @@ export default function AdminPage() {
   };
 
   const toggleCourse = async (id: string) => {
-    const res = await fetch(`http://localhost:3000/courses/${id}/toggle`, {
+    const res = await fetch(`${API_URL}/courses/${id}/toggle`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}` },
     });

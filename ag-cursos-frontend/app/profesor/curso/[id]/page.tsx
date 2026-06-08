@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FileUploadInput from '../../../components/FileUploadInput';
+import { API_URL } from '../../../lib/api';
 
 type Module = { id: string; title: string; description?: string; videoUrl?: string; documentUrl?: string };
 type ModuleForm = { title: string; description: string; videoUrl: string; documentUrl: string };
@@ -26,7 +27,7 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
   }, [user]);
 
   useEffect(() => {
-    fetch(`http://localhost:3000/courses/${id}`)
+    fetch(`${API_URL}/courses/${id}`)
       .then(res => res.json())
       .then(data => {
         setCourseTitle(data.title);
@@ -37,7 +38,7 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch(`http://localhost:3000/courses/${id}/modules`, {
+    const res = await fetch(`${API_URL}/courses/${id}/modules`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
@@ -59,7 +60,7 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
   };
 
   const handleEdit = async (modId: string) => {
-    const res = await fetch(`http://localhost:3000/modules/${modId}`, {
+    const res = await fetch(`${API_URL}/modules/${modId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
@@ -76,7 +77,7 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
 
   const handleDelete = async (modId: string) => {
     if (!confirm('¿Eliminár este módulo?')) return;
-    await fetch(`http://localhost:3000/modules/${modId}`, {
+    await fetch(`${API_URL}/modules/${modId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

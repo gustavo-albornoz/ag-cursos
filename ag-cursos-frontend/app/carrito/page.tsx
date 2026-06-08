@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
+import { API_URL } from '../lib/api';
 
 
 export default function CarritoPage() {
@@ -23,7 +24,7 @@ export default function CarritoPage() {
 
     try {
       for (const item of items) {
-        const res = await fetch('http://localhost:3000/checkout/mock', {
+        const res = await fetch(`${API_URL}/checkout/mock`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id, courseId: item.id }),

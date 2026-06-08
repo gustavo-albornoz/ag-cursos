@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import FileUploadInput from '../../components/FileUploadInput';
+import { API_URL } from '../../lib/api';
 
 type Course = { id: string; title: string; description: string; price: number; imageUrl?: string };
 type CourseForm = { title: string; description: string; price: string; imageUrl: string };
@@ -19,7 +20,7 @@ export default function ProfesorMisCursosPage() {
 
   useEffect(() => {
     if (!user || (!user.isProfesor && !user.isAdmin)) { router.push('/'); return; }
-    fetch('http://localhost:3000/courses/mine', {
+    fetch('${API_URL}/courses/mine', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -33,7 +34,7 @@ export default function ProfesorMisCursosPage() {
   };
 
   const handleEdit = async (id: string) => {
-    const res = await fetch(`http://localhost:3000/courses/${id}`, {
+    const res = await fetch(`${API_URL}/courses/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ title: editForm.title, description: editForm.description, price: parseFloat(editForm.price), imageUrl: editForm.imageUrl || undefined }),
@@ -45,7 +46,7 @@ export default function ProfesorMisCursosPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Seguro que querés eliminar este curso?')) return;
-    await fetch(`http://localhost:3000/courses/${id}`, {
+    await fetch(`${API_URL}/courses/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

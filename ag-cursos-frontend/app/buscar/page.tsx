@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import AddToCartButton from '../components/AddToCartButton';
+import { API_URL } from '../lib/api';
 
 type Course = { id: string; title: string; description: string; price: number; imageUrl?: string };
 
@@ -14,7 +15,7 @@ export default function BuscarPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3000/courses')
+    fetch(`${API_URL}/courses`)
       .then(res => res.json())
       .then(data => {
         setCourses(Array.isArray(data) ? data : []);

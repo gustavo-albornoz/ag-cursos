@@ -1,8 +1,9 @@
 import CourseCard from '../components/CourseCard';
+import { API_URL } from '../lib/api';
 
 async function getCourses() {
   try {
-    const res = await fetch('http://localhost:3000/courses', { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/courses`, { cache: 'no-store' });
     if (!res.ok) return [];
     return res.json();
   } catch {

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FileUploadInput from '../components/FileUploadInput';
+import { API_URL } from '../lib/api';
 
 type Course = { id: string; title: string; price: number; imageUrl?: string };
 type CourseForm = { title: string; description: string; price: string; imageUrl: string };
@@ -24,7 +25,7 @@ export default function ProfesorPage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch('http://localhost:3000/courses/mine', {
+    fetch('${API_URL}/courses/mine', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -37,7 +38,7 @@ export default function ProfesorPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/courses', {
+      const res = await fetch('${API_URL}/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { API_URL } from '../lib/api';
 
 type Course = { id: string; title: string; description: string; price: number; imageUrl?: string };
 type Purchase = { id: string; course: Course };
@@ -16,7 +17,7 @@ export default function MisCursosPage() {
 
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
-    fetch('http://localhost:3000/checkout/mis-cursos', {
+    fetch(`${API_URL}/checkout/mis-cursos`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import CourseCarousel from './components/CourseCarousel';
+import { API_URL } from './lib/api';
 
 async function getCourses() {
   try {
-    const res = await fetch('http://localhost:3000/courses', { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/courses`, { cache: 'no-store' });
     if (!res.ok) return [];
     return res.json();
   } catch {

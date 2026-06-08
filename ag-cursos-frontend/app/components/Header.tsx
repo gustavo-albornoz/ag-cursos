@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '../lib/api';
 
 type Course = { id: string; title: string };
 
@@ -17,7 +18,7 @@ export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/courses')
+    fetch(`${API_URL}/courses`)
       .then(res => res.json())
       .then(data => Array.isArray(data) ? setCourses(data) : setCourses([]))
       .catch(err => console.error('[Header] Error cargando cursos:', err));
