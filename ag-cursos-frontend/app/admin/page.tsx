@@ -24,14 +24,14 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch('${API_URL}/users', {
+    fetch(`${API_URL}/users`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
       .then(setUsers)
       .catch(() => {});
 
-    fetch('${API_URL}/courses/admin', {
+    fetch(`${API_URL}/courses/admin`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

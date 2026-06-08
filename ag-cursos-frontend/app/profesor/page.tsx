@@ -25,7 +25,7 @@ export default function ProfesorPage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch('${API_URL}/courses/mine', {
+    fetch(`${API_URL}/courses/mine`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -38,7 +38,7 @@ export default function ProfesorPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('${API_URL}/courses', {
+      const res = await fetch(`${API_URL}/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({

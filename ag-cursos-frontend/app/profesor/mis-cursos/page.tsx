@@ -20,7 +20,7 @@ export default function ProfesorMisCursosPage() {
 
   useEffect(() => {
     if (!user || (!user.isProfesor && !user.isAdmin)) { router.push('/'); return; }
-    fetch('${API_URL}/courses/mine', {
+    fetch(`${API_URL}/courses/mine`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

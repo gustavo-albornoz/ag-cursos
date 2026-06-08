@@ -27,7 +27,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems([]);
       return;
     }
-    fetch('${API_URL}/cart', {
+    fetch(`${API_URL}/cart`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -58,7 +58,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems(newItems);
     syncLocal(newItems);
     if (token) {
-      fetch('${API_URL}/cart', {
+      fetch(`${API_URL}/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ courseId: item.id }),
@@ -82,7 +82,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
     if (user) localStorage.setItem(localKey(user.id), JSON.stringify([]));
     if (token) {
-      fetch('${API_URL}/cart/clear', {
+      fetch(`${API_URL}/cart/clear`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       }).catch(() => {});
