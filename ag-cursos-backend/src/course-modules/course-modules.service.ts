@@ -5,11 +5,11 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CourseModulesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(courseId: string, data: { title: string; description?: string; videoUrl?: string; documentUrl?: string }) {
+  async create(courseId: string, data: { title: string; description?: string; videoUrl?: string; documentUrls?: string[] }) {
     return this.prisma.module.create({ data: { ...data, courseId } });
   }
 
-  async update(id: string, data: { title?: string; description?: string; videoUrl?: string; documentUrl?: string }) {
+  async update(id: string, data: { title?: string; description?: string; videoUrl?: string; documentUrls?: string[] }) {
     return this.prisma.module.update({ where: { id }, data });
   }
 

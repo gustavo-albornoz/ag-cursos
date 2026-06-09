@@ -34,13 +34,13 @@ model Course {
 }
 
 model Module {
-  id          String  @id @default(uuid())
-  title       String
-  description String?
-  videoUrl    String?
-  documentUrl String?
-  courseId    String
-  course      Course  @relation(fields: [courseId], references: [id])
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  videoUrl     String?
+  documentUrls String[]
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id])
 }
 
 model CartItem {

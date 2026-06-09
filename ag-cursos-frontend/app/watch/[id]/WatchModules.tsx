@@ -6,7 +6,7 @@ type Module = {
   title: string;
   description?: string;
   videoUrl?: string;
-  documentUrl?: string;
+  documentUrls?: string[];
 };
 
 function parseDoc(url: string): { name: string; ext: string } {
@@ -68,7 +68,7 @@ export default function WatchModules({ modules }: { modules: Module[] }) {
     <div className="space-y-6">
       {modules.map((mod, i) => {
         const isOpen = openIds.has(mod.id);
-        const hasContent = mod.videoUrl || mod.documentUrl || mod.description;
+        const hasDocs = mod.documentUrls && mod.documentUrls.length > 0;
 
         return (
           <div key={mod.id} className="border rounded-xl overflow-hidden bg-white shadow-sm">
@@ -106,36 +106,41 @@ export default function WatchModules({ modules }: { modules: Module[] }) {
                   </div>
                 )}
 
-                {mod.documentUrl && (() => {
-                  const { name, ext } = parseDoc(mod.documentUrl);
-                  const s = docStyle(ext);
-                  return (
-                    <div className="px-5 py-5 border-t">
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Documentos del módulo</p>
-                      <a
-                        href={mod.documentUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-3 border transition rounded-xl px-4 py-3 group ${s.card}`}
-                      >
-                        <div className={`rounded-lg p-2 flex-shrink-0 transition ${s.iconWrap}`}>
-                          <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${s.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className={`text-sm font-semibold ${s.title}`}>{name}</p>
-                          <p className={`text-xs ${s.sub}`}>Clic para abrir o descargar</p>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-2 ${s.arrow}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </a>
+                {hasDocs && (
+                  <div className="px-5 py-5 border-t">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Documentos del módulo</p>
+                    <div className="flex flex-col gap-2">
+                      {mod.documentUrls!.map((docUrl, idx) => {
+                        const { name, ext } = parseDoc(docUrl);
+                        const s = docStyle(ext);
+                        return (
+                          <a
+                            key={idx}
+                            href={docUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center gap-3 border transition rounded-xl px-4 py-3 group ${s.card}`}
+                          >
+                            <div className={`rounded-lg p-2 flex-shrink-0 transition ${s.iconWrap}`}>
+                              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${s.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className={`text-sm font-semibold ${s.title}`}>{name}</p>
+                              <p className={`text-xs ${s.sub}`}>Clic para abrir o descargar</p>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-2 ${s.arrow}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          </a>
+                        );
+                      })}
                     </div>
-                  );
-                })()}
+                  </div>
+                )}
 
-                {!mod.videoUrl && !mod.documentUrl && !mod.description && (
+                {!mod.videoUrl && !hasDocs && !mod.description && (
                   <p className="px-5 py-4 text-sm text-gray-400">Sin material disponible aún.</p>
                 )}
               </>

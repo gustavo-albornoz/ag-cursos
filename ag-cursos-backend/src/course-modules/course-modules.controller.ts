@@ -13,7 +13,7 @@ export class CourseModulesController {
   @Post('courses/:courseId/modules')
   create(
     @Param('courseId') courseId: string,
-    @Body() body: { title: string; description?: string; videoUrl?: string; documentUrl?: string },
+    @Body() body: { title: string; description?: string; videoUrl?: string; documentUrls?: string[] },
   ) {
     return this.courseModulesService.create(courseId, body);
   }
@@ -21,7 +21,7 @@ export class CourseModulesController {
   @Patch('modules/:id')
   update(
     @Param('id') id: string,
-    @Body() body: { title?: string; description?: string; videoUrl?: string; documentUrl?: string },
+    @Body() body: { title?: string; description?: string; videoUrl?: string; documentUrls?: string[] },
   ) {
     return this.courseModulesService.update(id, body);
   }
