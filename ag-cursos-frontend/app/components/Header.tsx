@@ -17,12 +17,14 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const fetchCourses = () => {
     fetch(`${API_URL}/courses`)
       .then(res => res.json())
       .then(data => Array.isArray(data) ? setCourses(data) : setCourses([]))
-      .catch(err => console.error('[Header] Error cargando cursos:', err));
-  }, []);
+      .catch(() => {});
+  };
+
+  useEffect(() => { fetchCourses(); }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -76,7 +78,7 @@ export default function Header() {
           {/* Dropdown Cursos */}
           <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => setDropdownOpen(o => !o)}
+              onClick={() => { const next = !dropdownOpen; setDropdownOpen(next); if (next) fetchCourses(); }}
               className="flex items-center gap-1 text-gray-700 hover:text-blue-600 font-medium transition"
             >
               Cursos
