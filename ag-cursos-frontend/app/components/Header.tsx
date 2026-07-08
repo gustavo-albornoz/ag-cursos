@@ -145,7 +145,9 @@ export default function Header() {
           {/* Sesión */}
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500">{user.email}</span>
+              <Link href="/perfil" className="text-sm text-gray-500 hover:text-blue-600 transition">
+                {user.email}
+              </Link>
               <button onClick={logout} className="text-sm text-red-500 hover:text-red-700 font-medium transition">
                 Salir
               </button>

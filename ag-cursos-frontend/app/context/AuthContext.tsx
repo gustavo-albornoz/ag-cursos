@@ -6,6 +6,9 @@ import { API_URL } from '../lib/api';
 export type User = {
   id: string;
   email: string;
+  nombre?: string | null;
+  apellido?: string | null;
+  telefono?: string | null;
   isAlumno: boolean;
   isProfesor: boolean;
   isAdmin: boolean;

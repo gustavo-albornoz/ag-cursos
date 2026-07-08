@@ -11,6 +11,10 @@ model User {
   id         String     @id @default(uuid())
   email      String     @unique
   password   String
+  nombre     String?
+  apellido   String?
+  telefono   String?
+  fotoPerfil String?
   isAlumno   Boolean    @default(true)
   isProfesor Boolean    @default(false)
   isAdmin    Boolean    @default(false)

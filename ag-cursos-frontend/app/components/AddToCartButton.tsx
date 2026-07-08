@@ -27,7 +27,10 @@ export default function AddToCartButton({ id, title, price }: Props) {
 
   return (
     <button
-      onClick={() => addItem({ id, title, price })}
+      onClick={() => {
+        if (!user) { router.push('/login'); return; }
+        addItem({ id, title, price });
+      }}
       className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition w-full md:w-auto"
     >
       Agregar al carrito
