@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FileUploadInput from '../../../components/FileUploadInput';
+import QuizEditor from '../../../components/QuizEditor';
 import { API_URL } from '../../../lib/api';
 
 type Module = { id: string; title: string; description?: string; videoUrl?: string; documentUrls?: string[] };
@@ -68,6 +69,7 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
   const [form, setForm] = useState<ModuleForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<ModuleForm>(emptyForm);
+  const [quizOpenId, setQuizOpenId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -100,6 +102,7 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
     setModules(prev => [...prev, newModule]);
     setForm(emptyForm);
     setLoading(false);
+    setQuizOpenId(newModule.id);
   };
 
   const startEdit = (mod: Module) => {
@@ -217,6 +220,13 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
                   <button onClick={() => setEditingId(null)} className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
                     Cancelar
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setQuizOpenId(quizOpenId === mod.id ? null : mod.id)}
+                    className="ml-auto text-purple-500 hover:text-purple-700 text-sm font-medium transition"
+                  >
+                    {quizOpenId === mod.id ? 'Cerrar quiz' : 'Cuestionario'}
+                  </button>
                 </div>
               </div>
             ) : (
@@ -246,12 +256,24 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
                     Editar
                   </button>
                   <button
+                    onClick={() => setQuizOpenId(quizOpenId === mod.id ? null : mod.id)}
+                    className="text-purple-500 hover:text-purple-700 text-sm font-medium transition"
+                  >
+                    {quizOpenId === mod.id ? 'Cerrar quiz' : 'Cuestionario'}
+                  </button>
+                  <button
                     onClick={() => handleDelete(mod.id)}
                     className="text-red-400 hover:text-red-600 text-sm font-medium transition"
                   >
                     Eliminar
                   </button>
                 </div>
+              </div>
+            )}
+
+            {quizOpenId === mod.id && (
+              <div className="border-t bg-gray-50 px-5 py-6">
+                <QuizEditor moduleId={mod.id} token={token!} />
               </div>
             )}
           </div>

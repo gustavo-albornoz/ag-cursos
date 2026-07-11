@@ -30,7 +30,10 @@ export class CoursesService {
   }
 
   async findOne(id: string) {
-    return this.prisma.course.findUnique({ where: { id }, include: { modules: true } });
+    return this.prisma.course.findUnique({
+      where: { id },
+      include: { modules: { include: { quiz: { select: { id: true } } } } },
+    });
   }
 
   async create(data: { title: string; description: string; price: number; imageUrl?: string; profesorId?: string }) {

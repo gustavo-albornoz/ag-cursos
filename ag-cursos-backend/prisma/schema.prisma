@@ -8,19 +8,20 @@ datasource db {
 }
 
 model User {
-  id         String     @id @default(uuid())
-  email      String     @unique
-  password   String
-  nombre     String?
-  apellido   String?
-  telefono   String?
-  fotoPerfil String?
-  isAlumno   Boolean    @default(true)
-  isProfesor Boolean    @default(false)
-  isAdmin    Boolean    @default(false)
-  courses    Course[]
-  purchases  Purchase[]
-  cartItems  CartItem[]
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  nombre       String?
+  apellido     String?
+  telefono     String?
+  fotoPerfil   String?
+  isAlumno     Boolean       @default(true)
+  isProfesor   Boolean       @default(false)
+  isAdmin      Boolean       @default(false)
+  courses      Course[]
+  purchases    Purchase[]
+  cartItems    CartItem[]
+  quizAttempts QuizAttempt[]
 }
 
 model Course {
@@ -45,6 +46,59 @@ model Module {
   documentUrls String[]
   courseId     String
   course       Course   @relation(fields: [courseId], references: [id])
+  quiz         Quiz?
+}
+
+model Quiz {
+  id           String        @id @default(uuid())
+  moduleId     String        @unique
+  module       Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  passingScore Int           @default(70)
+  maxAttempts  Int           @default(0)
+  questions    Question[]
+  attempts     QuizAttempt[]
+}
+
+model Question {
+  id       String       @id @default(uuid())
+  quizId   String
+  quiz     Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text     String
+  type     String       // "MULTIPLE_CHOICE" | "TRUE_FALSE"
+  order    Int
+  options  Option[]
+  answers  QuizAnswer[]
+}
+
+model Option {
+  id         String       @id @default(uuid())
+  questionId String
+  question   Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String
+  isCorrect  Boolean      @default(false)
+  answers    QuizAnswer[]
+}
+
+model QuizAttempt {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  quizId      String
+  quiz        Quiz         @relation(fields: [quizId], references: [id])
+  score       Float
+  passed      Boolean
+  completedAt DateTime     @default(now())
+  answers     QuizAnswer[]
+}
+
+model QuizAnswer {
+  id         String      @id @default(uuid())
+  attemptId  String
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question    @relation(fields: [questionId], references: [id])
+  optionId   String
+  option     Option      @relation(fields: [optionId], references: [id])
 }
 
 model CartItem {

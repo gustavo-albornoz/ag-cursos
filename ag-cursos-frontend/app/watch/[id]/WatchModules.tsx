@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import QuizModal from '../../components/QuizModal';
 
 type Module = {
   id: string;
@@ -7,6 +9,7 @@ type Module = {
   description?: string;
   videoUrl?: string;
   documentUrls?: string[];
+  quiz?: { id: string } | null;
 };
 
 function parseDoc(url: string): { name: string; ext: string } {
@@ -44,9 +47,12 @@ function docStyle(ext: string) {
 }
 
 export default function WatchModules({ modules }: { modules: Module[] }) {
+  const { token } = useAuth();
   const [openIds, setOpenIds] = useState<Set<string>>(
     () => new Set(modules.map(m => m.id))
   );
+  const [quizModuleId, setQuizModuleId] = useState<string | null>(null);
+  const quizModule = quizModuleId ? modules.find(m => m.id === quizModuleId) : null;
 
   const toggle = (id: string) => {
     setOpenIds(prev => {
@@ -143,11 +149,31 @@ export default function WatchModules({ modules }: { modules: Module[] }) {
                 {!mod.videoUrl && !hasDocs && !mod.description && (
                   <p className="px-5 py-4 text-sm text-gray-400">Sin material disponible aún.</p>
                 )}
+
+                {mod.quiz && (
+                  <div className="px-5 py-4 border-t flex justify-end">
+                    <button
+                      onClick={() => setQuizModuleId(mod.id)}
+                      className="bg-purple-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-purple-700 transition"
+                    >
+                      Rendir cuestionario
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>
         );
       })}
+
+      {quizModule && token && (
+        <QuizModal
+          moduleId={quizModule.id}
+          moduleTitle={quizModule.title}
+          token={token}
+          onClose={() => setQuizModuleId(null)}
+        />
+      )}
     </div>
   );
 }
