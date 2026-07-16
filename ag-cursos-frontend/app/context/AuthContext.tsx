@@ -14,10 +14,17 @@ export type User = {
   isAdmin: boolean;
 };
 
+export class SessionConflictError extends Error {
+  constructor() {
+    super('Ya hay una sesión activa en otro dispositivo');
+    this.name = 'SessionConflictError';
+  }
+}
+
 type AuthContextType = {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, force?: boolean) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
 };
@@ -44,13 +51,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('ag-cursos-auth', JSON.stringify({ user, token }));
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, force = false) => {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, force }),
     });
-    if (!res.ok) throw new Error('Credenciales inválidas');
+    if (!res.ok) {
+      if (res.status === 409) throw new SessionConflictError();
+      throw new Error('Credenciales inválidas');
+    }
     const data = await res.json();
     saveSession(data.user, data.access_token);
   };
@@ -67,6 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    if (token) {
+      fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+    }
     setUser(null);
     setToken(null);
     localStorage.removeItem('ag-cursos-auth');

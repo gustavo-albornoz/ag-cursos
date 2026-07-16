@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, SessionConflictError } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSessionConflict, setShowSessionConflict] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +21,24 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/');
     } catch (err: any) {
+      if (err instanceof SessionConflictError) {
+        setShowSessionConflict(true);
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForceLogin = async () => {
+    setLoading(true);
+    try {
+      await login(email, password, true);
+      setShowSessionConflict(false);
+      router.push('/');
+    } catch (err: any) {
+      setShowSessionConflict(false);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -74,6 +93,32 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
+
+      {showSessionConflict && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">No podés iniciar sesión acá</h2>
+            <p className="text-gray-500 mb-6">
+              Tu cuenta ya tiene una sesión activa en otro dispositivo. Solo se permite un inicio de sesión a la vez por usuario.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleForceLogin}
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-60"
+              >
+                {loading ? 'Cerrando la otra sesión...' : 'Cerrar esa sesión e iniciar acá'}
+              </button>
+              <button
+                onClick={() => setShowSessionConflict(false)}
+                className="w-full border py-2.5 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

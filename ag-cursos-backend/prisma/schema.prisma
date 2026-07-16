@@ -18,6 +18,7 @@ model User {
   isAlumno     Boolean       @default(true)
   isProfesor   Boolean       @default(false)
   isAdmin      Boolean       @default(false)
+  sessionId    String?
   courses      Course[]
   purchases    Purchase[]
   cartItems    CartItem[]
