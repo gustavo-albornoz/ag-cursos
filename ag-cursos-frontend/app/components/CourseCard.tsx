@@ -13,13 +13,7 @@ export default function CourseCard({ course }: { course: Course }) {
   return (
     <div className="bg-white border rounded-xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
       <div className="relative h-44 bg-blue-100 flex-shrink-0">
-        {course.imageUrl ? (
-          <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
-        ) : (
-          <div className="w-full h-full bg-blue-600 flex items-center justify-center">
-            <span className="text-5xl">🎓</span>
-          </div>
-        )}
+        <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover" />
       </div>
       <div className="p-5 flex flex-col flex-1">
         <h2 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">{course.title}</h2>

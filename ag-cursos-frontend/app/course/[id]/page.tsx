@@ -16,12 +16,10 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
     <div className="max-w-4xl mx-auto px-6 py-12">
       {/* Cabecera con imagen */}
       <div className="bg-blue-700 text-white rounded-2xl overflow-hidden mb-8">
-        {course.imageUrl && (
-          <div className="relative h-56 w-full">
-            <Image src={course.imageUrl} alt={course.title} fill className="object-cover opacity-30" />
-          </div>
-        )}
-        <div className={`p-8 ${course.imageUrl ? '-mt-20 relative' : ''}`}>
+        <div className="relative h-56 w-full">
+          <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover opacity-30" />
+        </div>
+        <div className="p-8 -mt-20 relative">
           <h1 className="text-4xl font-bold mb-3">{course.title}</h1>
           <p className="text-blue-100 text-lg mb-6">{course.description}</p>
           <div className="flex items-center justify-between flex-wrap gap-4">
@@ -40,17 +38,39 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
         </div>
       ) : (
         <div className="space-y-3">
-          {course.modules.map((mod: any, index: number) => (
-            <div key={mod.id} className="bg-white border rounded-xl p-5 flex items-center gap-4 shadow-sm">
-              <div className="bg-blue-100 text-blue-700 font-bold w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
-                {index + 1}
+          {course.modules.map((mod: any, index: number) => {
+            const isFreePreview = mod.isFree && mod.videoUrl;
+            return (
+              <div key={mod.id} className="bg-white border rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 flex items-center gap-4">
+                  <div className="bg-blue-100 text-blue-700 font-bold w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900">{mod.title}</h3>
+                      {mod.isFree && (
+                        <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                          Gratis
+                        </span>
+                      )}
+                    </div>
+                    {mod.videoUrl && !isFreePreview && (
+                      <p className="text-sm text-gray-400 mt-0.5">📹 Video disponible</p>
+                    )}
+                  </div>
+                </div>
+                {mod.isFree && mod.description && (
+                  <p className="px-5 py-4 text-gray-600 text-sm border-t">{mod.description}</p>
+                )}
+                {isFreePreview && (
+                  <div className="aspect-video border-t">
+                    <iframe src={mod.videoUrl} className="w-full h-full" allowFullScreen title={mod.title} />
+                  </div>
+                )}
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{mod.title}</h3>
-                {mod.videoUrl && <p className="text-sm text-gray-400 mt-0.5">📹 Video disponible</p>}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

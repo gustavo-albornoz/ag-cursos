@@ -9,6 +9,7 @@ type Module = {
   description?: string;
   videoUrl?: string;
   documentUrls?: string[];
+  isFree?: boolean;
   quiz?: { id: string } | null;
 };
 
@@ -86,6 +87,11 @@ export default function WatchModules({ modules }: { modules: Module[] }) {
                 {i + 1}
               </span>
               <h2 className="text-lg font-semibold text-gray-900 flex-1">{mod.title}</h2>
+              {mod.isFree && (
+                <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full flex-shrink-0">
+                  Gratis
+                </span>
+              )}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className={`h-5 w-5 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}

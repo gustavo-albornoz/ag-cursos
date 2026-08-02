@@ -7,7 +7,7 @@ import FileUploadInput from '../../../components/FileUploadInput';
 import QuizEditor from '../../../components/QuizEditor';
 import { API_URL } from '../../../lib/api';
 
-type Module = { id: string; title: string; description?: string; videoUrl?: string; documentUrls?: string[] };
+type Module = { id: string; title: string; description?: string; videoUrl?: string; documentUrls?: string[]; isFree?: boolean };
 type ModuleForm = { title: string; description: string; videoUrl: string; documentUrls: string[] };
 
 const emptyForm: ModuleForm = { title: '', description: '', videoUrl: '', documentUrls: [] };
@@ -209,10 +209,12 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
                   onChange={e => setEditForm(f => ({ ...f, videoUrl: e.target.value }))}
                   className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <DocList
-                  urls={editForm.documentUrls}
-                  onChange={urls => setEditForm(f => ({ ...f, documentUrls: urls }))}
-                />
+                {!mod.isFree && (
+                  <DocList
+                    urls={editForm.documentUrls}
+                    onChange={urls => setEditForm(f => ({ ...f, documentUrls: urls }))}
+                  />
+                )}
                 <div className="flex gap-2">
                   <button onClick={() => handleEdit(mod.id)} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
                     Guardar
@@ -220,13 +222,15 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
                   <button onClick={() => setEditingId(null)} className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
                     Cancelar
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setQuizOpenId(quizOpenId === mod.id ? null : mod.id)}
-                    className="ml-auto text-purple-500 hover:text-purple-700 text-sm font-medium transition"
-                  >
-                    {quizOpenId === mod.id ? 'Cerrar quiz' : 'Cuestionario'}
-                  </button>
+                  {!mod.isFree && (
+                    <button
+                      type="button"
+                      onClick={() => setQuizOpenId(quizOpenId === mod.id ? null : mod.id)}
+                      className="ml-auto text-purple-500 hover:text-purple-700 text-sm font-medium transition"
+                    >
+                      {quizOpenId === mod.id ? 'Cerrar quiz' : 'Cuestionario'}
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -235,7 +239,14 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900">{mod.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-gray-900">{mod.title}</p>
+                    {mod.isFree && (
+                      <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                        Gratis
+                      </span>
+                    )}
+                  </div>
                   <div className="flex gap-3 mt-0.5">
                     {mod.videoUrl && <span className="text-xs text-blue-500">🎬 Video</span>}
                     {mod.documentUrls && mod.documentUrls.length > 0 && (
@@ -255,18 +266,22 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
                   >
                     Editar
                   </button>
-                  <button
-                    onClick={() => setQuizOpenId(quizOpenId === mod.id ? null : mod.id)}
-                    className="text-purple-500 hover:text-purple-700 text-sm font-medium transition"
-                  >
-                    {quizOpenId === mod.id ? 'Cerrar quiz' : 'Cuestionario'}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(mod.id)}
-                    className="text-red-400 hover:text-red-600 text-sm font-medium transition"
-                  >
-                    Eliminar
-                  </button>
+                  {!mod.isFree && (
+                    <>
+                      <button
+                        onClick={() => setQuizOpenId(quizOpenId === mod.id ? null : mod.id)}
+                        className="text-purple-500 hover:text-purple-700 text-sm font-medium transition"
+                      >
+                        {quizOpenId === mod.id ? 'Cerrar quiz' : 'Cuestionario'}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(mod.id)}
+                        className="text-red-400 hover:text-red-600 text-sm font-medium transition"
+                      >
+                        Eliminar
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}

@@ -6,17 +6,19 @@ import { PrismaService } from '../prisma/prisma.service';
 describe('CourseModulesService', () => {
   let service: CourseModulesService;
   let prisma: {
+    module: { findFirst: jest.Mock; findUnique: jest.Mock; create: jest.Mock; update: jest.Mock; delete: jest.Mock };
     question: { count: jest.Mock; create: jest.Mock; findUnique: jest.Mock; update: jest.Mock; delete: jest.Mock };
     option: { deleteMany: jest.Mock };
-    quiz: { findUnique: jest.Mock };
+    quiz: { findUnique: jest.Mock; upsert: jest.Mock };
     quizAttempt: { count: jest.Mock; create: jest.Mock; findMany: jest.Mock };
   };
 
   beforeEach(async () => {
     prisma = {
+      module: { findFirst: jest.fn(), findUnique: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
       question: { count: jest.fn(), create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), delete: jest.fn() },
       option: { deleteMany: jest.fn() },
-      quiz: { findUnique: jest.fn() },
+      quiz: { findUnique: jest.fn(), upsert: jest.fn() },
       quizAttempt: { count: jest.fn(), create: jest.fn(), findMany: jest.fn() },
     };
 
@@ -25,6 +27,107 @@ describe('CourseModulesService', () => {
     }).compile();
 
     service = module.get(CourseModulesService);
+  });
+
+  describe('create', () => {
+    it('asigna order 0 cuando es el primer modulo del curso', async () => {
+      prisma.module.findFirst.mockResolvedValue(null);
+      prisma.module.create.mockResolvedValue({ id: 'm-1', order: 0 });
+
+      await service.create('course-1', { title: 'Introducción' });
+
+      expect(prisma.module.create).toHaveBeenCalledWith({
+        data: { title: 'Introducción', courseId: 'course-1', order: 0 },
+      });
+    });
+
+    it('asigna order siguiente al ultimo modulo existente', async () => {
+      prisma.module.findFirst.mockResolvedValue({ id: 'm-1', order: 2 });
+      prisma.module.create.mockResolvedValue({ id: 'm-2', order: 3 });
+
+      await service.create('course-1', { title: 'Módulo nuevo' });
+
+      expect(prisma.module.create).toHaveBeenCalledWith({
+        data: { title: 'Módulo nuevo', courseId: 'course-1', order: 3 },
+      });
+    });
+  });
+
+  describe('remove', () => {
+    it('lanza NotFoundException si el modulo no existe', async () => {
+      prisma.module.findUnique.mockResolvedValue(null);
+
+      await expect(service.remove('m-x')).rejects.toThrow(NotFoundException);
+      expect(prisma.module.delete).not.toHaveBeenCalled();
+    });
+
+    it('lanza BadRequestException si el modulo es el gratuito introductorio', async () => {
+      prisma.module.findUnique.mockResolvedValue({ id: 'm-0', isFree: true });
+
+      await expect(service.remove('m-0')).rejects.toThrow(BadRequestException);
+      expect(prisma.module.delete).not.toHaveBeenCalled();
+    });
+
+    it('elimina el modulo cuando no es el gratuito', async () => {
+      prisma.module.findUnique.mockResolvedValue({ id: 'm-1', isFree: false });
+      prisma.module.delete.mockResolvedValue({ id: 'm-1' });
+
+      await service.remove('m-1');
+
+      expect(prisma.module.delete).toHaveBeenCalledWith({ where: { id: 'm-1' } });
+    });
+  });
+
+  describe('update', () => {
+    it('lanza BadRequestException si intenta agregar documentos a un modulo gratuito', async () => {
+      prisma.module.findUnique.mockResolvedValue({ id: 'm-0', isFree: true });
+
+      await expect(service.update('m-0', { documentUrls: ['doc.pdf'] })).rejects.toThrow(BadRequestException);
+      expect(prisma.module.update).not.toHaveBeenCalled();
+    });
+
+    it('permite actualizar un modulo gratuito sin documentos', async () => {
+      prisma.module.update.mockResolvedValue({ id: 'm-0', title: 'Nuevo título' });
+
+      await service.update('m-0', { title: 'Nuevo título' });
+
+      expect(prisma.module.findUnique).not.toHaveBeenCalled();
+      expect(prisma.module.update).toHaveBeenCalledWith({ where: { id: 'm-0' }, data: { title: 'Nuevo título' } });
+    });
+
+    it('permite documentos en un modulo que no es gratuito', async () => {
+      prisma.module.findUnique.mockResolvedValue({ id: 'm-1', isFree: false });
+      prisma.module.update.mockResolvedValue({ id: 'm-1', documentUrls: ['doc.pdf'] });
+
+      await service.update('m-1', { documentUrls: ['doc.pdf'] });
+
+      expect(prisma.module.update).toHaveBeenCalledWith({ where: { id: 'm-1' }, data: { documentUrls: ['doc.pdf'] } });
+    });
+  });
+
+  describe('upsertQuiz', () => {
+    it('lanza NotFoundException si el modulo no existe', async () => {
+      prisma.module.findUnique.mockResolvedValue(null);
+
+      await expect(service.upsertQuiz('m-x', {})).rejects.toThrow(NotFoundException);
+      expect(prisma.quiz.upsert).not.toHaveBeenCalled();
+    });
+
+    it('lanza BadRequestException si el modulo es el gratuito introductorio', async () => {
+      prisma.module.findUnique.mockResolvedValue({ id: 'm-0', isFree: true });
+
+      await expect(service.upsertQuiz('m-0', {})).rejects.toThrow(BadRequestException);
+      expect(prisma.quiz.upsert).not.toHaveBeenCalled();
+    });
+
+    it('crea el quiz cuando el modulo no es el gratuito', async () => {
+      prisma.module.findUnique.mockResolvedValue({ id: 'm-1', isFree: false });
+      prisma.quiz.upsert.mockResolvedValue({ id: 'quiz-1' });
+
+      await service.upsertQuiz('m-1', { passingScore: 70 });
+
+      expect(prisma.quiz.upsert).toHaveBeenCalled();
+    });
   });
 
   describe('addQuestion / validateOptions', () => {

@@ -37,7 +37,7 @@ export default function ProfesorMisCursosPage() {
     const res = await fetch(`${API_URL}/courses/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ title: editForm.title, description: editForm.description, price: parseFloat(editForm.price), imageUrl: editForm.imageUrl || undefined }),
+      body: JSON.stringify({ title: editForm.title, description: editForm.description, price: parseFloat(editForm.price), imageUrl: editForm.imageUrl }),
     });
     const updated = await res.json();
     setCourses(prev => prev.map(c => c.id === id ? updated : c));
@@ -108,11 +108,7 @@ export default function ProfesorMisCursosPage() {
               ) : (
                 <div className="flex items-center gap-4 p-5">
                   <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-blue-100">
-                    {course.imageUrl ? (
-                      <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-blue-600 flex items-center justify-center text-2xl">🎓</div>
-                    )}
+                    <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900">{course.title}</h3>

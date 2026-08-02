@@ -9,14 +9,23 @@ export class CourseModulesService {
   constructor(private prisma: PrismaService) {}
 
   async create(courseId: string, data: { title: string; description?: string; videoUrl?: string; documentUrls?: string[] }) {
-    return this.prisma.module.create({ data: { ...data, courseId } });
+    const last = await this.prisma.module.findFirst({ where: { courseId }, orderBy: { order: 'desc' } });
+    return this.prisma.module.create({ data: { ...data, courseId, order: (last?.order ?? -1) + 1 } });
   }
 
   async update(id: string, data: { title?: string; description?: string; videoUrl?: string; documentUrls?: string[] }) {
+    if (data.documentUrls && data.documentUrls.length > 0) {
+      const mod = await this.prisma.module.findUnique({ where: { id } });
+      if (!mod) throw new NotFoundException('Módulo no encontrado');
+      if (mod.isFree) throw new BadRequestException('El módulo introductorio gratuito no admite documentos');
+    }
     return this.prisma.module.update({ where: { id }, data });
   }
 
   async remove(id: string) {
+    const mod = await this.prisma.module.findUnique({ where: { id } });
+    if (!mod) throw new NotFoundException('Módulo no encontrado');
+    if (mod.isFree) throw new BadRequestException('No se puede eliminar el módulo introductorio gratuito');
     return this.prisma.module.delete({ where: { id } });
   }
 
@@ -34,6 +43,9 @@ export class CourseModulesService {
   }
 
   async upsertQuiz(moduleId: string, data: { passingScore?: number; maxAttempts?: number }) {
+    const mod = await this.prisma.module.findUnique({ where: { id: moduleId } });
+    if (!mod) throw new NotFoundException('Módulo no encontrado');
+    if (mod.isFree) throw new BadRequestException('El módulo introductorio gratuito no admite cuestionario');
     return this.prisma.quiz.upsert({
       where: { moduleId },
       create: { moduleId, ...data },
