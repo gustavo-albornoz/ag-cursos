@@ -8,6 +8,55 @@ import { API_URL } from '../lib/api';
 
 type Course = { id: string; title: string };
 
+function SearchForm({
+  value,
+  onChange,
+  onSubmit,
+  className = '',
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  className?: string;
+}) {
+  return (
+    <form onSubmit={onSubmit} className={className}>
+      <div className="relative">
+        <input
+          type="text"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder="Buscar cursos..."
+          className="w-full border rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+        />
+        <button
+          type="submit"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function CartLink({ itemCount, onClick }: { itemCount: number; onClick: () => void }) {
+  return (
+    <Link href="/carrito" className="relative flex-shrink-0" onClick={onClick}>
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700 hover:text-blue-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-9H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      {itemCount > 0 && (
+        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+          {itemCount}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export default function Header() {
   const { items } = useCart();
   const { user, logout } = useAuth();
@@ -48,41 +97,6 @@ export default function Header() {
     router.push(`/buscar?q=${encodeURIComponent(q)}`);
   };
 
-  const SearchForm = ({ className = '' }: { className?: string }) => (
-    <form onSubmit={handleSearch} className={className}>
-      <div className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Buscar cursos..."
-          className="w-full border rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-        />
-        <button
-          type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-          </svg>
-        </button>
-      </div>
-    </form>
-  );
-
-  const CartLink = () => (
-    <Link href="/carrito" className="relative flex-shrink-0" onClick={() => setMobileMenuOpen(false)}>
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700 hover:text-blue-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-9H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-      {items.length > 0 && (
-        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-          {items.length}
-        </span>
-      )}
-    </Link>
-  );
-
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-4">
@@ -93,7 +107,7 @@ export default function Header() {
           </Link>
 
           {/* Buscador — solo desktop en esta fila */}
-          <SearchForm className="hidden md:block flex-1 max-w-sm" />
+          <SearchForm value={searchQuery} onChange={setSearchQuery} onSubmit={handleSearch} className="hidden md:block flex-1 max-w-sm" />
 
           {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-6 ml-auto">
@@ -152,7 +166,7 @@ export default function Header() {
               </Link>
             )}
 
-            <CartLink />
+            <CartLink itemCount={items.length} onClick={() => setMobileMenuOpen(false)} />
 
             {/* Sesión */}
             {user ? (
@@ -173,7 +187,7 @@ export default function Header() {
 
           {/* Acciones mobile: carrito + hamburguesa */}
           <div className="flex md:hidden items-center gap-4 ml-auto">
-            <CartLink />
+            <CartLink itemCount={items.length} onClick={() => setMobileMenuOpen(false)} />
             <button
               onClick={() => setMobileMenuOpen(open => !open)}
               aria-label="Abrir menú"
@@ -193,7 +207,7 @@ export default function Header() {
         </div>
 
         {/* Buscador — fila propia en mobile */}
-        <SearchForm className="md:hidden mt-3" />
+        <SearchForm value={searchQuery} onChange={setSearchQuery} onSubmit={handleSearch} className="md:hidden mt-3" />
       </div>
 
       {/* Menú mobile */}
