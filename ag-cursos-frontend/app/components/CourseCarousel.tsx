@@ -30,7 +30,13 @@ export default function CourseCarousel({ courses }: { courses: Course[] }) {
     <div className="relative max-w-3xl mx-auto">
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
         <div className="relative md:w-64 h-48 md:h-auto flex-shrink-0 bg-blue-100">
-          <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover" />
+          <Image
+            src={course.imageUrl || '/default.jpg'}
+            alt={course.title}
+            fill
+            sizes="(min-width: 768px) 256px, 100vw"
+            className="object-cover"
+          />
         </div>
         <div className="p-8 flex flex-col justify-center flex-1">
           <span className="text-blue-600 text-sm font-semibold uppercase tracking-wide mb-2">Curso destacado</span>

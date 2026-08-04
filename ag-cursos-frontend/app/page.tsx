@@ -22,7 +22,7 @@ export default async function Home() {
       {/* Hero */}
       <section className="relative bg-blue-700 text-white py-28 px-6 overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/hero.jpg" alt="Hero" fill className="object-cover opacity-20" />
+          <Image src="/hero.jpg" alt="Hero" fill sizes="100vw" className="object-cover opacity-20" />
         </div>
         <div className="relative max-w-4xl mx-auto text-center">
           <h1 className="text-5xl font-bold mb-4 leading-tight">Aprendé sin límites</h1>
@@ -50,7 +50,7 @@ export default async function Home() {
       <section id="acerca" className="py-16 px-6 bg-gray-900 text-white overflow-hidden">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
           <div className="relative w-full md:w-96 h-64 rounded-2xl overflow-hidden flex-shrink-0">
-            <Image src="/about.jpg" alt="Acerca de nosotros" fill className="object-cover" />
+            <Image src="/about.jpg" alt="Acerca de nosotros" fill sizes="(min-width: 768px) 384px, 100vw" className="object-cover" />
           </div>
           <div>
             <h2 className="text-3xl font-bold mb-4">Acerca de Nosotros</h2>

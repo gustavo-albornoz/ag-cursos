@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FileUploadInput from '../../../components/FileUploadInput';
+import VideoSourceInput from '../../../components/VideoSourceInput';
 import QuizEditor from '../../../components/QuizEditor';
 import { API_URL } from '../../../lib/api';
 
@@ -166,10 +167,9 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
             />
             <p className="text-xs text-gray-400 text-right mt-1">{form.description.length}/500</p>
           </div>
-          <input
-            type="url" placeholder="URL del video (YouTube embed, opcional)" value={form.videoUrl}
-            onChange={e => setForm(f => ({ ...f, videoUrl: e.target.value }))}
-            className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <VideoSourceInput
+            value={form.videoUrl}
+            onChange={url => setForm(f => ({ ...f, videoUrl: url }))}
           />
           <DocList
             urls={form.documentUrls}
@@ -204,10 +204,9 @@ export default function GestionModulosPage({ params }: { params: Promise<{ id: s
                   />
                   <p className="text-xs text-gray-400 text-right mt-1">{editForm.description.length}/500</p>
                 </div>
-                <input
-                  type="url" placeholder="URL del video (opcional)" value={editForm.videoUrl}
-                  onChange={e => setEditForm(f => ({ ...f, videoUrl: e.target.value }))}
-                  className="w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <VideoSourceInput
+                  value={editForm.videoUrl}
+                  onChange={url => setEditForm(f => ({ ...f, videoUrl: url }))}
                 />
                 {!mod.isFree && (
                   <DocList

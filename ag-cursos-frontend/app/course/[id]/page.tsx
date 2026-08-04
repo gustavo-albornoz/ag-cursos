@@ -17,7 +17,13 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
       {/* Cabecera con imagen */}
       <div className="bg-blue-700 text-white rounded-2xl overflow-hidden mb-8">
         <div className="relative h-56 w-full">
-          <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover opacity-30" />
+          <Image
+            src={course.imageUrl || '/default.jpg'}
+            alt={course.title}
+            fill
+            sizes="(min-width: 896px) 896px, 100vw"
+            className="object-cover opacity-30"
+          />
         </div>
         <div className="p-8 -mt-20 relative">
           <h1 className="text-4xl font-bold mb-3">{course.title}</h1>

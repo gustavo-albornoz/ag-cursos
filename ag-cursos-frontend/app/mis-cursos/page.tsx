@@ -47,7 +47,13 @@ export default function MisCursosPage() {
           {purchases.map(({ course }) => (
             <div key={course.id} className="bg-white border rounded-xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
               <div className="relative h-44 bg-blue-100 flex-shrink-0">
-                <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover" />
+                <Image
+                  src={course.imageUrl || '/default.jpg'}
+                  alt={course.title}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover"
+                />
               </div>
               <div className="p-5 flex flex-col flex-1">
                 <h2 className="text-lg font-semibold text-gray-900 mb-1">{course.title}</h2>

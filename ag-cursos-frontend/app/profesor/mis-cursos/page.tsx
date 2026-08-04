@@ -108,7 +108,7 @@ export default function ProfesorMisCursosPage() {
               ) : (
                 <div className="flex items-center gap-4 p-5">
                   <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-blue-100">
-                    <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover" />
+                    <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill sizes="80px" className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900">{course.title}</h3>

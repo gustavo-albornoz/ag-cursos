@@ -57,7 +57,13 @@ function BuscarResultados() {
           {results.map(course => (
             <div key={course.id} className="bg-white border rounded-2xl shadow-sm overflow-hidden flex flex-col">
               <div className="relative h-40 bg-blue-100">
-                <Image src={course.imageUrl || '/default.jpg'} alt={course.title} fill className="object-cover" />
+                <Image
+                  src={course.imageUrl || '/default.jpg'}
+                  alt={course.title}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  className="object-cover"
+                />
               </div>
               <div className="p-5 flex flex-col flex-1">
                 <h2 className="font-bold text-gray-900 text-lg mb-1 line-clamp-2">{course.title}</h2>
